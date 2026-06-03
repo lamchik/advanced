@@ -1,0 +1,21 @@
+{
+  "name": "advance-test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@vueuse/core": "^14.2.1",
+    "vue": "^3.5.29"
+  },
+  "description": ""
+}

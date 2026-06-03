@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Advance Days Calendar — верификация логики</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f6f9;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .app {
+            max-width: 1300px;
+            width: 100%;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            padding: 28px 32px;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        h1 small {
+            font-size: 16px;
+            font-weight: 400;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 40px;
+        }
+        .badge {
+            background: #3b82f6;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .stats-panel {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 24px;
+            margin: 24px 0;
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            border: 1px solid #e2e8f0;
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .stat-value {
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #0f172a;
+        }
+        .stat-value span {
+            font-size: 18px;
+            font-weight: 400;
+            color: #475569;
+            margin-left: 8px;
+        }
+        .over-limit-badge {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 28px 0 20px;
+        }
+        .month-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 18px 16px;
+            transition: all 0.15s;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -2px rgba(0,0,0,0.03);
+        }
+        .month-card:hover {
+            border-color: #94a3b8;
+            background: #fcfcfd;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -8px rgba(0,0,0,0.1);
+        }
+        .month-card.selected-set {
+            background: #e6f7e6;
+            border-color: #2e7d32;
+            border-width: 2px;
+        }
+        .month-card.selected-unset {
+            background: #ffebee;
+            border-color: #c62828;
+            border-width: 2px;
+        }
+        .month-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: #1e293b;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .month-stats {
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px dashed #edf2f7;
+        }
+        .stat-name {
+            color: #475569;
+        }
+        .stat-number {
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+        .over-limit {
+            background: #ffcdd2;
+            color: #b71c1c;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 13px;
+        }
+        .button-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 20px 0 10px;
+        }
+        button {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e293b;
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        button.primary {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+        button.primary:hover {
+            background: #1d4ed8;
+        }
+        button.warning {
+            background: #f97316;
+            border-color: #f97316;
+            color: white;
+        }
+        button.danger {
+            background: #ef4444;
+            border-color: #ef4444;
+            color: white;
+        }
+        button:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+        .console-box {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 20px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            margin-top: 30px;
+            max-height: 300px;
+            overflow: auto;
+        }
+        .legend {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+            font-size: 13px;
+            color: #334155;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 6px;
+        }
+        .legend-color.set { background: #2e7d32; }
+        .legend-color.unset { background: #c62828; }
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 24px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <h1>
+        🧪 Advance Days — верификация логики
+        <small>useAdvanceDays + store</small>
+    </h1>
+
+    <div class="stats-panel">
+        <div class="stat-item">
+            <span class="stat-label">📦 Резерв прошлых лет</span>
+            <span class="stat-value" id="reserveDisplay">0</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">⚡ Авансовые дни</span>
+            <span class="stat-value" id="advanceDisplay">0</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">📅 Всего потрачено</span>
+            <span class="stat-value" id="totalSpentDisplay">0<span>дн</span></span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">⚠️ Превышение (overLimit)</span>
+            <span class="stat-value" id="overLimitTotalDisplay">0</span>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><span class="legend-color set"></span> ЛКМ — set (добавить день)</div>
+        <div class="legend-item"><span class="legend-color unset"></span> Ctrl+ЛКМ — unset (убрать день)</div>
+        <div class="legend-item"><span class="over-limit-badge">🔥 месяцы с overLimit</span></div>
+    </div>
+
+    <div id="calendarContainer" class="calendar-grid"></div>
+
+    <div class="button-bar">
+        <button class="primary" onclick="resetToDefault()">🔄 Сброс (резерв=0, аванс=2)</button>
+        <button onclick="setPreset(5,2)">📊 5 резерв, 2 аванс</button>
+        <button onclick="setPreset(0,8)">⚡ 0 резерв, 8 аванс</button>
+        <button class="warning" onclick="simulateManySets()">🔥 Нажать 30 раз (тест overLimit)</button>
+        <button class="danger" onclick="hardReset()">🗑️ Полный сброс</button>
+        <button onclick="printToConsole()">📋 Вывести в консоль таблицу</button>
+    </div>
+
+    <hr />
+
+    <div>
+        <h3 style="margin:0 0 12px 0">📟 Консоль состояния (кликай по месяцам — смотри сюда)</h3>
+        <div id="liveConsole" class="console-box">
+            <div>👉 Нажми на любой месяц, чтобы начать...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- КОНСТАНТЫ ----------
+        const MONTHS = [
+            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+        ];
+        const VESTED_STEP = 3; // 2.3333 дня в месяц
+
+        // ---------- ГЛОБАЛЬНОЕ ХРАНИЛИЩЕ (имитация useAdvanceDaysStore) ----------
+        let balances = {};
+        const CURRENT_YEAR = 2026;
+
+        // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (из исходного хука) ----------
+
+        // Максимальное кол-во vested дней к месяцу index
+        function maxVestedForMonth(index) {
+            if (index === 11) {
+                return Math.ceil(VESTED_STEP * 12);
+            }
+            return Math.floor(VESTED_STEP * (index + 1));
+        }
+
+        // Пересчёт всех vested (min-over-suffix)
+        function recalcAllVested() {
+            const calendar = balances[CURRENT_YEAR].calendar;
+            const cumSpent = [];
+            let sum = 0;
+            for (let i = 0; i < calendar.length; i++) {
+                sum += calendar[i].vestedSpent;
+                cumSpent.push(sum);
+            }
+
+            calendar.forEach((month, i) => {
+                let minSlack = Infinity;
+                for (let k = i; k < calendar.length; k++) {
+                    minSlack = Math.min(minSlack, maxVestedForMonth(k) - cumSpent[k]);
+                }
+                month.vested = Math.max(0, minSlack);
+            });
+        }
+
+        // Рекурсивный поиск overLimit в направлении (prev/next) для swap
+        function swapOverLimit(month, balance, direction, source) {
+            if (month.overLimit > 0) {
+                month.overLimit--;
+                balance[source]--;
+                if (source === 'advance') month.advanceSpent++;
+                else if (source === 'reserve') month.reserveSpent++;
+                return true;
+            }
+            const sibling = month[direction];
+            return sibling ? swapOverLimit(sibling, balance, direction, source) : false;
+        }
+
+        // Поиск месяца для замены на vested (после unset)
+        function swapToVested(balance, calendar) {
+            for (const month of calendar) {
+                if (month.vested <= 0) continue;
+
+                if (month.overLimit > 0) {
+                    month.overLimit--;
+                    month.vestedSpent++;
+                    recalcAllVested();
+                    return true;
+                }
+                if (month.advanceSpent > 0) {
+                    month.advanceSpent--;
+                    balance.advance++;
+                    month.vestedSpent++;
+                    recalcAllVested();
+                    return true;
+                }
+                if (month.reserveSpent > 0) {
+                    month.reserveSpent--;
+                    balance.reserve++;
+                    month.vestedSpent++;
+                    recalcAllVested();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // ---------- ОСНОВНАЯ ФУНКЦИЯ changeYearAdvanceBalance (полная копия логики) ----------
+        function changeYearAdvanceBalance(year, monthIndex, action) {
+            const balance = balances[year];
+            if (!balance) return;
+
+            const month = balance.calendar[monthIndex];
+            if (!month) return;
+
+            // SET
+            if (action === 'set') {
+                if (month.vested > 0) {
+                    month.vestedSpent++;
+                    recalcAllVested();
+                } else if (balance.reserve > 0) {
+                    balance.reserve--;
+                    month.reserveSpent++;
+                } else if (balance.advance > 0) {
+                    balance.advance--;
+                    month.advanceSpent++;
+                } else {
+                    month.overLimit++;
+                }
+                return;
+            }
+
+            // UNSET
+            if (action === 'unset') {
+                if (month.overLimit > 0) {
+                    month.overLimit--;
+                    return;
+                }
+                if (month.advanceSpent > 0) {
+                    month.advanceSpent--;
+                    balance.advance++;
+
+                    if (month.prev) {
+                        if (swapOverLimit(month.prev, balance, 'prev', 'advance')) return;
+                    }
+                    if (month.next) {
+                        swapOverLimit(month.next, balance, 'next', 'advance');
+                    }
+                    return;
+                }
+                if (month.reserveSpent > 0) {
+                    month.reserveSpent--;
+                    balance.reserve++;
+
+                    if (month.prev) {
+                        if (swapOverLimit(month.prev, balance, 'prev', 'reserve')) return;
+                    }
+                    if (month.next) {
+                        swapOverLimit(month.next, balance, 'next', 'reserve');
+                    }
+                    return;
+                }
+                if (month.vestedSpent > 0) {
+                    month.vestedSpent--;
+                    recalcAllVested();
+                    swapToVested(balance, balance.calendar);
+                    return;
+                }
+            }
+        }
+
+        // ---------- ИНИЦИАЛИЗАЦИЯ КАЛЕНДАРЯ (initCalendarAdvanceBalance) ----------
+        function initCalendarAdvanceBalance(year, prevYears, advanceDays) {
+            // если уже есть — выходим (как в хуке)
+            if (balances[year]) return;
+
+            function initMonth(title, index) {
+                return {
+                    title: title,
+                    vested: maxVestedForMonth(index),
+                    vestedSpent: 0,
+                    reserveSpent: 0,
+                    advanceSpent: 0,
+                    overLimit: 0,
+                    next: null,
+                    prev: null
+                };
+            }
+
+            // создаём сырые месяцы
+            let rawMonths = MONTHS.map((title, idx) => initMonth(title, idx));
+
+            // проставляем next/prev
+            rawMonths.forEach((month, i) => {
+                month.prev = i > 0 ? rawMonths[i-1] : null;
+                month.next = i < rawMonths.length-1 ? rawMonths[i+1] : null;
+            });
+
+            balances[year] = {
+                reserve: prevYears,
+                advance: advanceDays,
+                calendar: rawMonths
+            };
+        }
+
+        // ---------- ФУНКЦИИ ДЛЯ UI ----------
+        function renderCalendar() {
+            const container = document.getElementById('calendarContainer');
+            const yearData = balances[CURRENT_YEAR];
+            if (!yearData) return;
+
+            let html = '';
+            yearData.calendar.forEach((month, idx) => {
+                html += `
+                    <div class="month-card" data-month="${idx}" data-action="set">
+                        <div class="month-title">
+                            ${month.title}
+                            ${month.overLimit > 0 ? '<span class="over-limit">🔥 over ' + month.overLimit + '</span>' : ''}
+                        </div>
+                        <div class="month-stats">
+                            <div class="stat-row"><span class="stat-name">📌 vested</span><span class="stat-number">${month.vested}</span></div>
+                            <div class="stat-row"><span class="stat-name">✅ vestedSpent</span><span class="stat-number">${month.vestedSpent}</span></div>
+                            <div class="stat-row"><span class="stat-name">📦 reserveSpent</span><span class="stat-number">${month.reserveSpent}</span></div>
+                            <div class="stat-row"><span class="stat-name">⚡ advanceSpent</span><span class="stat-number">${month.advanceSpent}</span></div>
+                            <div class="stat-row" style="border-bottom: none;"><span class="stat-name">⚠️ overLimit</span><span class="stat-number">${month.overLimit}</span></div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+
+            // обновить цифровые панели
+            updateStatsPanels();
+
+            // подсветить последний клик (необязательно)
+        }
+
+        function updateStatsPanels() {
+            const b = balances[CURRENT_YEAR];
+            if (!b) return;
+            document.getElementById('reserveDisplay').innerText = b.reserve;
+            document.getElementById('advanceDisplay').innerText = b.advance;
+
+            const totalSpent = b.calendar.reduce((acc, m) => acc + m.vestedSpent + m.reserveSpent + m.advanceSpent, 0);
+            document.getElementById('totalSpentDisplay').innerHTML = totalSpent + '<span> дн</span>';
+
+            const totalOver = b.calendar.reduce((acc, m) => acc + m.overLimit, 0);
+            document.getElementById('overLimitTotalDisplay').innerText = totalOver;
+
+            const overLimitMonths = b.calendar.filter(m => m.overLimit > 0).map(m => m.title).join(', ');
+            // добавим в консоль информацию позже
+        }
+
+        function logToConsole(message, data) {
+            const consoleDiv = document.getElementById('liveConsole');
+            const timestamp = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            let line = `[${timestamp}] ${message}`;
+            if (data) {
+                line += ` ${JSON.stringify(data)}`;
+            }
+            consoleDiv.innerHTML = `<div>${line}</div>` + consoleDiv.innerHTML;
+            if (consoleDiv.children.length > 10) {
+                consoleDiv.removeChild(consoleDiv.lastChild);
+            }
+        }
+
+        // ---------- ОБРАБОТЧИК КЛИКОВ ----------
+        function handleMonthClick(e) {
+            const card = e.target.closest('.month-card');
+            if (!card) return;
+
+            const monthIndex = parseInt(card.dataset.month);
+            const isUnset = e.ctrlKey || e.shiftKey;   // ctrl или shift = unset
+            const action = isUnset ? 'unset' : 'set';
+
+            // для наглядной подсветки
+            document.querySelectorAll('.month-card').forEach(c => c.classList.remove('selected-set', 'selected-unset'));
+            card.classList.add(action === 'set' ? 'selected-set' : 'selected-unset');
+
+            // выполняем логику
+            changeYearAdvanceBalance(CURRENT_YEAR, monthIndex, action);
+
+            // рендерим заново
+            renderCalendar();
+
+            // дополнительная информация в консоль
+            const month = balances[CURRENT_YEAR].calendar[monthIndex];
+            logToConsole(
+                `${action === 'set' ? '➕ set' : '➖ unset'}  <b>${month.title}</b>  | ` +
+                `vested:${month.vested} spent:${month.vestedSpent} reserveSpent:${month.reserveSpent} advanceSpent:${month.advanceSpent} over:${month.overLimit} | ` +
+                `резерв:${balances[CURRENT_YEAR].reserve} аванс:${balances[CURRENT_YEAR].advance}`
+            );
+
+            // также в браузерную консоль
+            console.log(`[${action}] ${month.title}`, {
+                month: { ...month, prev: '..', next: '..' },
+                reserve: balances[CURRENT_YEAR].reserve,
+                advance: balances[CURRENT_YEAR].advance
+            });
+        }
+
+        // ---------- PRESETS ----------
+        window.resetToDefault = function() {
+            balances = {};
+            initCalendarAdvanceBalance(CURRENT_YEAR, 0, 2);
+            renderCalendar();
+            logToConsole('🔄 Сброс: резерв=0, аванс=2', {});
+        };
+
+        window.setPreset = function(reserve, advance) {
+            balances = {};
+            initCalendarAdvanceBalance(CURRENT_YEAR, reserve, advance);
+            renderCalendar();
+            logToConsole(`📊 preset: резерв=${reserve}, аванс=${advance}`, {});
+        };
+
+        window.simulateManySets = function() {
+            for (let i = 0; i < 30; i++) {
+                const randomMonth = Math.floor(Math.random() * 12);
+                changeYearAdvanceBalance(CURRENT_YEAR, randomMonth, 'set');
+            }
+            renderCalendar();
+            logToConsole('🔥 30 случайных set (проверка overLimit)', {});
+        };
+
+        window.hardReset = function() {
+            balances = {};
+            renderCalendar(); // очистит
+            logToConsole('🗑️ Полный сброс (нет данных)', {});
+        };
+
+        window.printToConsole = function() {
+            const b = balances[CURRENT_YEAR];
+            if (!b) return console.warn('Нет данных');
+            console.log('========== КАЛЕНДАРЬ ==========');
+            console.table(b.calendar.map((m, idx) => ({
+                Месяц: m.title,
+                vested: m.vested,
+                vestedSpent: m.vestedSpent,
+                reserveSpent: m.reserveSpent,
+                advanceSpent: m.advanceSpent,
+                overLimit: m.overLimit,
+            })));
+            console.log('reserve:', b.reserve, 'advance:', b.advance);
+            logToConsole('📋 Таблица выведена в нативную консоль (F12)', {});
+        };
+
+        // инициализация при загрузке
+        window.onload = function() {
+            initCalendarAdvanceBalance(CURRENT_YEAR, 0, 0);
+            renderCalendar();
+
+            document.getElementById('calendarContainer').addEventListener('click', handleMonthClick);
+
+            logToConsole('✅ Готово. Используй клик / Ctrl+клик по месяцам', {});
+            // покажем максимальные vested (для информации)
+            let maxVestStr = '';
+            for (let i=0; i<12; i++) {
+                maxVestStr += maxVestedForMonth(i) + ' ';
+            }
+            console.log('📈 Макс. vested по месяцам:', maxVestStr);
+        };
+
+        // делаем некоторые функции глобальными (для консоли браузера)
+        window.balances = balances;  // чтобы можно было смотреть
+        window.CURRENT_YEAR = CURRENT_YEAR;
+        window.changeYearAdvanceBalance = changeYearAdvanceBalance;
+        window.recalcAllVested = recalcAllVested;
+        window.maxVestedForMonth = maxVestedForMonth;
+        window.getState = () => balances[CURRENT_YEAR];
+        window.printCalendar = printToConsole; // алиас
+    })();
+</script>
+</body>
+</html>
